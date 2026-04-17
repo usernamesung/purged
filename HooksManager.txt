@@ -1,0 +1,88 @@
+local HookMgr = {
+	Registry = {},
+	GameMT = {
+		__namecall = function(self, ...) end,
+		__index = function(self, Index: string) end,
+		__newindex = function(self, Index: string, Value: any) end,
+	},
+}
+
+if getrawmetatable then
+	HookMgr.GameMT = getrawmetatable(game)
+end
+
+HookMgr.RegisterHook = function(
+	HookName: string,
+	FunctionReference: (...any) -> ...any,
+	Hook: (Original: (...any) -> ...any, ...any) -> ...any
+): { Original: (...any) -> ...any, Reference: (...any) -> ...any }
+	local OriginalFunction: (...any) -> ...any
+
+    local HookKey = "HookMgr_Hook_" .. HookName
+    local OriginalKey = "HookMgr_Original_" .. HookName
+
+    shared.HookRegistry = shared.HookRegistry or {}
+    shared.HookRegistry[HookKey] = Hook
+
+    local Success, Error = pcall(function()
+        OriginalFunction = hookfunction(
+            FunctionReference,
+            loadstring(
+                `return function(...) return shared.HookRegistry["{HookKey}"]( shared.HookRegistry["{OriginalKey}"], ... ) end`
+            )()
+        )
+    end)
+
+    if not Success then
+        warn("Failed to hook function:", HookName, "Error:", Error)
+    end
+
+    local RegistryEntry = HookMgr.Registry[HookName]
+    if RegistryEntry then
+        restorefunction(RegistryEntry.Reference)
+        warn("Hook for function", HookName, "already exists. Overriding.")
+    end
+
+    shared.HookRegistry[OriginalKey] = OriginalFunction
+    
+	HookMgr.Registry[HookName] = {
+		Original = OriginalFunction or FunctionReference,
+		Reference = FunctionReference,
+	}
+
+	return HookMgr.Registry[HookName]
+end
+
+HookMgr.UnregisterHook = function(HookName: string)
+    local RegistryEntry = HookMgr.Registry[HookName]
+
+    if RegistryEntry then
+        local Success, Error = pcall(function()
+            restorefunction(RegistryEntry.Reference)
+        end)
+
+        if not Success then
+            warn("Failed to unhook function:", HookName, "Error:", Error)
+        end
+    else
+        warn("Hook for function", HookName, "does not exist.")
+    end
+
+	HookMgr.Registry[HookName] = nil
+end
+
+HookMgr.ClearHooks = function()
+    for HookName, RegistryEntry in next, HookMgr.Registry do
+        local Success, Error = pcall(function()
+            restorefunction(RegistryEntry.Reference)
+        end)
+
+        if not Success then
+            warn("Failed to unhook function:", HookName, "Error:", Error)
+        end
+    end
+
+	HookMgr.Registry = {}
+end
+
+return HookMgr
