@@ -4037,6 +4037,10 @@ Bracket.Elements = {
 			Colorpicker.Value = Colorpicker.Value
 		end)
 
+	RunService.Heartbeat:Connect(function()
+    if not ColorpickerAsset or not ColorpickerAsset:FindFirstChild("Color") then return end  -- ADD THIS
+    if Colorpicker.Value[5] then
+							
 		local HeartbeatConnection
 		HeartbeatConnection = RunService.Heartbeat:Connect(function()
 		    if not ColorpickerAsset or not ColorpickerAsset.Parent then
