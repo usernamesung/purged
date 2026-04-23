@@ -4037,29 +4037,20 @@ Bracket.Elements = {
 			Colorpicker.Value = Colorpicker.Value
 		end)
 
-	RunService.Heartbeat:Connect(function()
-    if not ColorpickerAsset or not ColorpickerAsset:FindFirstChild("Color") then return end  -- ADD THIS
-    if Colorpicker.Value[5] then
-							
-		local HeartbeatConnection
-		HeartbeatConnection = RunService.Heartbeat:Connect(function()
-		    if not ColorpickerAsset or not ColorpickerAsset.Parent then
-		        HeartbeatConnection:Disconnect()
-		        return
-		    end
-		    if Colorpicker.Value[5] then
-		        if PaletteAsset.Visible then
-		            Colorpicker.Value[1] = Window.RainbowHue
-		            Colorpicker.Value = Colorpicker.Value
-		        else
-		            Colorpicker.Value[1] = Window.RainbowHue
-		            Colorpicker.Value[6] = Bracket.Utilities.TableToColor(Colorpicker.Value)
-		            ColorpickerAsset.Color.BackgroundColor3 = Colorpicker.Value[6]
-		
-		            Window.Flags[Colorpicker.Flag] = Colorpicker.Value
-		            Colorpicker.Callback(Colorpicker.Value, Colorpicker.Value[6])
-		        end
-		    end
+		RunService.Heartbeat:Connect(function()
+			if Colorpicker.Value[5] then
+				if PaletteAsset.Visible then
+					Colorpicker.Value[1] = Window.RainbowHue
+					Colorpicker.Value = Colorpicker.Value
+				else
+					Colorpicker.Value[1] = Window.RainbowHue
+					Colorpicker.Value[6] = Bracket.Utilities.TableToColor(Colorpicker.Value)
+					ColorpickerAsset.Color.BackgroundColor3 = Colorpicker.Value[6]
+
+					Window.Flags[Colorpicker.Flag] = Colorpicker.Value
+					Colorpicker.Callback(Colorpicker.Value, Colorpicker.Value[6])
+				end
+			end
 		end)
 
 		Colorpicker:GetPropertyChangedSignal("Name"):Connect(function(Name)
